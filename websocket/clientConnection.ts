@@ -1,6 +1,6 @@
 import {v4 as uuidv4} from 'uuid';
 import * as WebSocket from 'ws';
-import { HandleMessage } from './message/MessageHandler';
+import { HandleMessage, InActiveHandleMessage } from './message/MessageHandler';
 import { BaseMessage } from './message/types/Base';
 import { CreateConnectedMessage } from './message/types/Connected';
 import { CreateOpenMessage } from './message/types/Open';
@@ -23,13 +23,13 @@ export class ClientConnection {
         this.status = ConnectionStatus.Connected
         this.ws = ws
         this.connectionManager = connectionManager
+
+        this.SetMessageListeners()
     }
  
     public SetActive(name: string) {
         this.clientName = name
         this.status = ConnectionStatus.Active
-        this.SetMessageListeners()
-
         this.connectionManager.ActivateConnection(this)
     }
 
@@ -47,9 +47,8 @@ export class ClientConnection {
     }
 
     private SetMessageListeners() {
-        this.ws.on('message', this.HandleMessage.bind(this))
         this.ws.onopen = this.HandleOpen.bind(this)
-        //this.ws.onmessage = this.HandleMessage.bind(this)
+        this.ws.onmessage = this.HandleMessage.bind(this)
         this.ws.onerror = this.HandleError.bind(this)
         this.ws.onclose = this.HandleClose.bind(this)
     }
@@ -61,7 +60,11 @@ export class ClientConnection {
     }
 
     private HandleMessage(event: WebSocket.MessageEvent) {
-        HandleMessage(this, event)
+        if(this.status == ConnectionStatus.Active) {
+            HandleMessage(this, event)
+        } else {
+            InActiveHandleMessage(this, event)
+        }
     }
 
     private HandleError(event: WebSocket.ErrorEvent) {

@@ -9,7 +9,7 @@ export function HandleAddLetter(connection : ClientConnection, message: string) 
     let valid = ValidateAddLetterMessage(addLetterParsed)
 
     if(valid) {
-        connection.SendMessageAll(CreateNewLetterMessage(connection.clientName, addLetterParsed.l))
+        connection.SendMessageAll(CreateNewLetterMessage(addLetterParsed.l, connection.clientName))
     } else {
         console.log("text update message was not valid: " + message)
     }
