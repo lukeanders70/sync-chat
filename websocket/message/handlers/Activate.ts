@@ -8,10 +8,12 @@ export function HandleActivate(connection : ClientConnection, message: string) {
     let valid = ValidateActivateMessage(activateParsed)
 
     if(valid) {
-        if(activateParsed.connectionID = connection.connectionId) {
+        if(activateParsed.connectionId == connection.connectionId) {
             connection.SetActive(activateParsed.clientName)
+        } else {
+            console.error("tried to activate connection with id: " + connection.connectionId + " but message was sent with id: " + activateParsed.connectionId)
         }
     } else {
-        console.log("text update message was not valid: " + message)
+        console.error("activate message was not valid: " + message)
     }
 }
