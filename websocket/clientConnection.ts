@@ -27,10 +27,14 @@ export class ClientConnection {
         this.SetMessageListeners()
     }
  
-    public SetActive(name: string) {
+    public SetActive(name: string): boolean {
         this.clientName = name
         this.status = ConnectionStatus.Active
-        this.connectionManager.ActivateConnection(this)
+        const successfullyActivated = this.connectionManager.ActivateConnection(this)
+        if(successfullyActivated) {
+            this.status = ConnectionStatus.Active
+        }
+        return successfullyActivated
     }
 
     public SendMessage(message : BaseMessage, forceActive : boolean = true) {
@@ -96,6 +100,7 @@ export class ClientConnectionManager {
     }
 
     public AddConnection(ws : WebSocket) : string {
+        console.log("Attempting to add new connection")
         let newConnectionId = uuidv4();
         var newConnection = new ClientConnection(ws, newConnectionId, this)
         this.connections.set(newConnectionId, newConnection)
@@ -105,11 +110,11 @@ export class ClientConnectionManager {
         return newConnectionId
     }
 
-    public ActivateConnection(connection : ClientConnection) {
+    public ActivateConnection(connection : ClientConnection) : boolean {
         if (!this.connections.has(connection.connectionId)) {
             console.error("tried to activate connection, but not present in connection manager. Removing")
             this.RemoveConnection(connection)
-            return
+            return false
         }
         if(this.activeConnections.has(connection.clientName)) {
             let existingActiveConnection = this.activeConnections.get(connection.clientName)
@@ -119,15 +124,16 @@ export class ClientConnectionManager {
                 console.error("tried to activate connection, but name is already in use. Disconnecting")
                 this.RemoveConnection(connection)
             }
-            return
+            return false
         }
         if(connection.clientName == null || connection.clientName == "" || connection.status != ConnectionStatus.Active) {
             console.error("tried to activate a connection, but was not activatable. Disconnecting")
             this.RemoveConnection(connection)
-            return
+            return false
         }
         this.activeConnections.set(connection.clientName, connection)
         console.log("activated connection : " + connection.connectionId + " with name " + connection.clientName)
+        return true;
     }
 
     public SendMessageAll(message : BaseMessage) {

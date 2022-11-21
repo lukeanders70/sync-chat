@@ -1,5 +1,5 @@
 import { ClientConnection } from "../../clientConnection";
-import { ActivateMessage, ValidateActivateMessage } from "../types/Activate";
+import { ActivateMessage, CreateActiveResponseMessage, ValidateActivateMessage } from "../types/Activate";
 
 
 export function HandleActivate(connection : ClientConnection, message: string) {
@@ -9,7 +9,9 @@ export function HandleActivate(connection : ClientConnection, message: string) {
 
     if(valid) {
         if(activateParsed.connectionId == connection.connectionId) {
-            connection.SetActive(activateParsed.clientName)
+            const success = connection.SetActive(activateParsed.clientName)
+            let activeResponseMessage = CreateActiveResponseMessage(connection.connectionId, connection.clientName, success)
+            connection.SendMessage(activeResponseMessage)
         } else {
             console.error("tried to activate connection with id: " + connection.connectionId + " but message was sent with id: " + activateParsed.connectionId)
         }
