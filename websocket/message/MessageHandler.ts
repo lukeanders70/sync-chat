@@ -1,6 +1,7 @@
 import * as WebSocket from 'ws';
 import { ClientConnection } from '../clientConnection';
 import { HandleActivate } from './handlers/Activate';
+import { HandleActiveClientList } from './handlers/ActiveClientList';
 import { HandleAddLetter } from './handlers/AddLetter';
 import { BaseMessage, ValidateBaseMessage } from './types/Base';
 
@@ -11,6 +12,8 @@ export function HandleMessage(connection : ClientConnection, event: WebSocket.Me
 
     if(valid) {
         switch (eventDataParsed.type) {
+            case "active-client-list":
+                HandleActiveClientList(connection, eventData)
             case "add-letter":
                 HandleAddLetter(connection, eventData)
                 break;

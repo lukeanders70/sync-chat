@@ -4,6 +4,7 @@ import { HandleMessage, InActiveHandleMessage } from './message/MessageHandler';
 import { BaseMessage } from './message/types/Base';
 import { CreateConnectedMessage } from './message/types/Connected';
 import { CreateOpenMessage } from './message/types/Open';
+import { CreateRemoveClientMessage } from './message/types/RemoveClient';
 
 export enum ConnectionStatus {
     Connected = 1,
@@ -48,6 +49,10 @@ export class ClientConnection {
 
     public SendMessageAll(message : BaseMessage) {
         this.connectionManager.SendMessageAll(message)
+    }
+
+    public SendMessageToAllOtherClients(message : BaseMessage) {
+        this.connectionManager.SendMessageAllExcept(message, this.connectionId)
     }
 
     private SetMessageListeners() {
@@ -143,6 +148,23 @@ export class ClientConnectionManager {
         });
     }
 
+    public SendMessageAllExcept(message : BaseMessage, connectionIdToExclude : string) {
+        console.log("sending message of type: " + message.type + " on all active connections except " + connectionIdToExclude)
+        this.activeConnections.forEach((connection: ClientConnection, key: string) => {
+            if(connection.connectionId != connectionIdToExclude) {
+                connection.SendMessage(message)
+            }
+        });
+    }
+
+    public GetActiveClientNames(): string[] {
+        let activeClientNames : string[] = []
+        this.activeConnections.forEach((connection: ClientConnection, key: string) => {
+            activeClientNames.push(key)
+        });
+        return activeClientNames
+    }
+
     public RemoveConnection(connection : ClientConnection) {
         let connDeleted = false
         let activeConnDeleted = false
@@ -194,6 +216,10 @@ export class ClientConnectionManager {
         }
 
         console.log("removed connection with name: " + connection.clientName + " and id: " + connection.connectionId)
+
+        // Send message to all other clients informting them that this client is gone now
+        const removeClientMessage = CreateRemoveClientMessage(connection.clientName)
+        this.SendMessageAll(removeClientMessage)
     }
 
 }
