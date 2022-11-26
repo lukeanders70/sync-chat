@@ -1,5 +1,6 @@
 import { ClientConnection } from "../../clientConnection";
 import { ActivateMessage, CreateActiveResponseMessage, ValidateActivateMessage } from "../types/Activate";
+import { CreateNewClientMessage } from "../types/NewClient";
 
 
 export function HandleActivate(connection : ClientConnection, message: string) {
@@ -10,8 +11,14 @@ export function HandleActivate(connection : ClientConnection, message: string) {
     if(valid) {
         if(activateParsed.connectionId == connection.connectionId) {
             const success = connection.SetActive(activateParsed.clientName)
-            let activeResponseMessage = CreateActiveResponseMessage(connection.connectionId, connection.clientName, success)
+
+            // respond on new connection to let it know that activation succeeded
+            const activeResponseMessage = CreateActiveResponseMessage(connection.connectionId, connection.clientName, success)
             connection.SendMessage(activeResponseMessage)
+
+            // tell all the other client connections that we have a new client connected
+            const newClientMessage = CreateNewClientMessage(connection.clientName)
+            connection.SendMessageToAllOtherClients(newClientMessage)
         } else {
             console.error("tried to activate connection with id: " + connection.connectionId + " but message was sent with id: " + activateParsed.connectionId)
         }

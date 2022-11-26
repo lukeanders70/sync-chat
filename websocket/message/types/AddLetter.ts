@@ -7,7 +7,7 @@ export interface AddLetterMessage extends BaseMessage {
 
 
 export function ValidateAddLetterMessage(message: AddLetterMessage) {
-    return message.l != null && message.l.length == 1
+    return message.l != undefined && message.l.length == 1
 }
 
 // This defines a message sent from the server to inform clients about a new letter from a specific user

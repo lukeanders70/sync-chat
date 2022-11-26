@@ -18,7 +18,7 @@ export interface ActiveResponse extends BaseMessage {
 
 export function CreateActiveResponseMessage(connectionId : string, clientName: string, success: boolean){
     let activeResponseMessage : ActiveResponse = {
-        type: "active-response",
+        type: "activate-response",
         connectionId: connectionId,
         clientName: clientName,
         success: success,
