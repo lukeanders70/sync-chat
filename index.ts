@@ -28,8 +28,8 @@ function setupHttpServer(): http.Server<typeof http.IncomingMessage, typeof http
     httpApp.get('/', function (req, res) {
         res.sendFile(path.join(__dirname, 'frontendBuild', 'index.html'))
     });
-    httpApp.listen(process.env.HTTP_PORT || 8080, () => {
-        console.log(`HTTP Server started on port ${process.env.HTTP_PORT || 8080}`);
+    httpApp.listen(process.env.HTTP_PORT || 80, () => {
+        console.log(`HTTP Server started on port ${process.env.HTTP_PORT || 80}`);
     });
 
     return httpServer
